@@ -1,0 +1,16 @@
+{
+  "name": "blazor-sql.js",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "copy": "cp -r node_modules/sql.js/dist/sql-wasm.* wwwroot/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Andrii Kurdiumov <kant2002@gmail.com>",
+  "license": "MIT",
+  "description": "",
+  "dependencies": {
+    "sql.js": "^1.13.0"
+  }
+}
