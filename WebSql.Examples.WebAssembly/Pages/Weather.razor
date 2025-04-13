@@ -56,15 +56,11 @@ VALUES ('2022-01-06', 1, 'Feezing'),
         if (result is { })
         {
             var resultset = result[0];
-            Console.WriteLine(resultset.Values[0][0].GetType().FullName);
-            Console.WriteLine(resultset.Values[0][1].GetType().FullName);
-            Console.WriteLine(resultset.Values[0][2].GetType().FullName);
-            Console.WriteLine(resultset.Values[0][3].GetType().FullName);
             forecasts = resultset.Values.Select(row => new WeatherForecast
                 { 
-                    Date = DateOnly.Parse(row[1]?.ToString() ?? ""), 
+                    Date = DateOnly.Parse(row[1].ToString() ?? ""), 
                     TemperatureC = int.Parse(row[2].ToString()!), 
-                    Summary = row[3]?.ToString() 
+                    Summary = row[3].ToString() 
                 }).ToArray();
         }
     }

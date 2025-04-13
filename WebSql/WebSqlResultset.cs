@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Text.Json;
 
 namespace WebSql;
 
@@ -15,5 +15,5 @@ public class WebSqlResultset
     /// <summary>
     /// Gets or sets the rows data n the result set.
     /// </summary>
-    public required JSObject[][] Values { get; set; }
+    public required JsonElement[][] Values { get; set; }
 }
