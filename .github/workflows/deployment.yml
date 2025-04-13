@@ -40,15 +40,20 @@ jobs:
 
       - name: Publish Sample
         run: dotnet publish WebSql.Examples.WebAssembly/WebSql.Examples.WebAssembly.csproj -c Release --verbosity normal
+        if: github.event_name != 'pull_request'
       - name: Change base-tag in index.html from / to WebSql
         run: sed -i 's/<base href="\/" \/>/<base href="\/WebSql\/" \/>/g' artifacts/publish/WebSql.Examples.WebAssembly/release/wwwroot/index.html
+        if: github.event_name != 'pull_request'
       - name: Add .nojekyll file
         run: touch artifacts/publish/WebSql.Examples.WebAssembly/release/wwwroot/.nojekyll
+        if: github.event_name != 'pull_request'
       - name: copy index.html to 404.html
         run: cp artifacts/publish/WebSql.Examples.WebAssembly/release/wwwroot/index.html artifacts/publish/WebSql.Examples.WebAssembly/release/wwwroot/404.html
+        if: github.event_name != 'pull_request'
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: ./artifacts/publish/WebSql.Examples.WebAssembly/release/wwwroot
 
