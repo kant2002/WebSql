@@ -2,6 +2,9 @@
 
 namespace WebSql;
 
+/// <summary>
+/// Reference to Sql.js database instance in the JavaScript context.
+/// </summary>
 public class WebSqlDatabase : IAsyncDisposable
 {
     internal readonly IJSObjectReference objectReference;
