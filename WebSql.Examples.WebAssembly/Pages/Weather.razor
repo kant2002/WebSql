@@ -6,8 +6,25 @@
 
 <h1>Weather</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
+<p>This component demonstrates creating database using SQL.</p>
 
+<code>
+@CreateDatabaseSql
+</code>
+
+<p>Then populating that database using SQL.</p>
+
+<code>
+@InsertTestDataSql
+</code>
+
+<p>And return data from database using SELECT.</p>
+
+<code>
+@SelectTestDataSql
+</code>
+
+<h2>Results</h2>
 @if (forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -40,19 +57,22 @@ else
 @code {
     private WeatherForecast[]? forecasts;
 
+    private string CreateDatabaseSql = "CREATE TABLE IF NOT EXISTS WeatherForecast (Id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, TemperatureC INTEGER, Summary TEXT);";
+    private string InsertTestDataSql = @"INSERT INTO WeatherForecast(Date, TemperatureC, Summary)
+VALUES ('2022-01-06', 1, 'Feezing'),
+    ('2022-01-07', 14, 'Bracing'),
+    ('2022-01-08', -13, 'Feezing'),
+    ('2022-01-09', -16, 'Balmy'),
+    ('2022-01-10', -2, 'Chilly'),
+    ('2022-01-11', -3, 'Chilly')";
+    private string SelectTestDataSql = "SELECT * FROM WeatherForecast";
+
     protected override async Task OnInitializedAsync()
     {
         var database = await ExampleJsInterop.CreateDatabase();
-        await database.ExecuteAsync("CREATE TABLE IF NOT EXISTS WeatherForecast (Id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, TemperatureC INTEGER, Summary TEXT);");
-        await database.ExecuteAsync(
-            @"INSERT INTO WeatherForecast(Date, TemperatureC, Summary) 
-VALUES ('2022-01-06', 1, 'Feezing'), 
-    ('2022-01-07', 14, 'Bracing'), 
-    ('2022-01-08', -13, 'Feezing'), 
-    ('2022-01-09', -16, 'Balmy'), 
-    ('2022-01-10', -2, 'Chilly'),
-    ('2022-01-11', -3, 'Chilly')");
-        var result = await database.ExecuteAsync("SELECT * FROM WeatherForecast");
+        await database.ExecuteAsync(CreateDatabaseSql);
+        await database.ExecuteAsync(InsertTestDataSql);
+        var result = await database.ExecuteAsync(SelectTestDataSql);
         if (result is { })
         {
             var resultset = result[0];
