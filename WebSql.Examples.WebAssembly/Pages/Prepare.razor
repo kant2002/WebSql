@@ -1,0 +1,75 @@
+﻿@page "/prepare"
+@inject WebSqlInterop WebSqlInterop
+
+<PageTitle>Prepare</PageTitle>
+
+<h1>Prepare</h1>
+
+<p>This component demonstrates using prepared statements on database. Let's create test data first</p>
+
+<code>
+@PrepareTestDataSql
+</code>
+
+<p>Then prepare statement and bind parameter.</p>
+
+<code>
+@NamedParameterPrepareSql
+</code>
+
+<p>This produces following object:</p>
+
+<dl>
+    @foreach (var item in objectResults)
+    {
+        <dt>@item.Key</dt>
+        <dd>@item.Value.ToString()</dd>
+    }
+</dl>
+
+<p>Re-bind parameters and iterate over each individual results.</p>
+
+<table>
+    <tbody>
+        @foreach (var item in listResults)
+        {
+            <tr>
+                @foreach (var column in item)
+                {
+                    <td>@column</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private string PrepareTestDataSql = @"CREATE TABLE hello (a int, b char);
+INSERT INTO hello VALUES (0, 'hello');
+INSERT INTO hello VALUES (1, 'world');
+";
+    private string NamedParameterPrepareSql = "SELECT * FROM hello WHERE a=:aval AND b=:bval";
+    private string AnonymousParameterPrepareSql = "SELECT * FROM hello WHERE a=? AND b=?";
+
+    private Dictionary<string, object> objectResults = new();
+    List<object[]> listResults = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var database = await WebSqlInterop.CreateDatabase();
+        await database.ExecuteAsync(PrepareTestDataSql);
+        await using var namedParameterStatement = await database.PrepareAsync(NamedParameterPrepareSql);
+        objectResults = await namedParameterStatement.GetAsObjectAsync(
+            new Dictionary<string, object> { { ":aval", 1 }, { ":bval", "world" } });
+
+        await using var anonymousParameterStatement = await database.PrepareAsync(AnonymousParameterPrepareSql);
+        await anonymousParameterStatement.BindAsync(0, "hello");
+        while (await anonymousParameterStatement.StepAsync())
+        {
+            var rowResult = await anonymousParameterStatement.GetAsync();
+            listResults.Add(rowResult);
+            StateHasChanged();
+            await Task.Delay(2000);
+        }
+    }
+}

@@ -1,7 +1,99 @@
 ﻿@page "/"
+@inject WebSqlInterop WebSqlInterop
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Sample</PageTitle>
 
-<h1>Hello, world!</h1>
+<PageTitle>Sample</PageTitle>
 
-Welcome to your new app.
+<h1>Sample</h1>
+
+<p>This component demonstrates creating database using SQL.</p>
+
+<code>
+    @CreateDatabaseSql
+</code>
+
+<p>Then populating that database using SQL.</p>
+
+<code>
+    @InsertTestDataSql
+</code>
+
+<p>And return data from database using SELECT.</p>
+
+<code>
+    @SelectTestDataSql
+</code>
+
+<h2>Results</h2>
+@if (forecasts == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th aria-label="Temperature in Celsius">Temp. (C)</th>
+                <th aria-label="Temperature in Farenheit">Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var forecast in forecasts)
+            {
+                <tr>
+                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.TemperatureC</td>
+                    <td>@forecast.TemperatureF</td>
+                    <td>@forecast.Summary</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecasts;
+
+    private string CreateDatabaseSql = "CREATE TABLE IF NOT EXISTS WeatherForecast (Id INTEGER PRIMARY KEY AUTOINCREMENT, Date TEXT, TemperatureC INTEGER, Summary TEXT);";
+    private string InsertTestDataSql = @"INSERT INTO WeatherForecast(Date, TemperatureC, Summary)
+VALUES ('2022-01-06', 1, 'Feezing'),
+    ('2022-01-07', 14, 'Bracing'),
+    ('2022-01-08', -13, 'Feezing'),
+    ('2022-01-09', -16, 'Balmy'),
+    ('2022-01-10', -2, 'Chilly'),
+    ('2022-01-11', -3, 'Chilly')";
+    private string SelectTestDataSql = "SELECT * FROM WeatherForecast";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var database = await WebSqlInterop.CreateDatabase();
+        await database.ExecuteAsync(CreateDatabaseSql);
+        await database.ExecuteAsync(InsertTestDataSql);
+        var result = await database.ExecuteAsync(SelectTestDataSql);
+        if (result is { })
+        {
+            var resultset = result[0];
+            forecasts = resultset.Values.Select(row => new WeatherForecast
+            {
+                Date = DateOnly.Parse(row[1].ToString() ?? ""),
+                TemperatureC = int.Parse(row[2].ToString()!),
+                Summary = row[3].ToString()
+            }).ToArray();
+        }
+    }
+
+    public class WeatherForecast
+    {
+        public DateOnly Date { get; set; }
+
+        public int TemperatureC { get; set; }
+
+        public string? Summary { get; set; }
+
+        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    }
+}

@@ -1,0 +1,44 @@
+﻿@page "/parameter-binding"
+@inject WebSqlInterop WebSqlInterop
+
+<PageTitle>Parameter Binding</PageTitle>
+
+<h1>Parameter Binding</h1>
+
+@if (result == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <h2>Results</h2>
+    <code>SELECT id FROM test</code>
+    <ResultsetViewer Resultset="result[0]" />
+
+    <h2>Results</h2>
+    <code>SELECT age,name FROM test WHERE id=$id1</code>
+    <ResultsetViewer Resultset="result[1]" />
+}
+@code {
+    private string ParametersSampleSql = @"DROP TABLE IF EXISTS test;
+CREATE TABLE test (id INTEGER, age INTEGER, name TEXT);
+INSERT INTO test VALUES ($id1, :age1, @name1);
+INSERT INTO test VALUES ($id2, :age2, @name2);
+SELECT id FROM test;
+SELECT age,name FROM test WHERE id=$id1";
+
+    private WebSqlResultset[]? result;
+    protected override async Task OnInitializedAsync()
+    {
+        var database = await WebSqlInterop.CreateDatabase();
+        result = await database.ExecuteAsync(ParametersSampleSql, new Dictionary<string, object>()
+        {
+            {"$id1", 1 },
+            { ":age1", 10 },
+            { "@name1", "Ling" },
+            { "$id2", 2 },
+            { ":age2", 18 },
+            { "@name2", "Paul"  }
+        });
+    }
+}
