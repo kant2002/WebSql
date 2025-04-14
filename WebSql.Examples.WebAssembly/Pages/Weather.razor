@@ -1,6 +1,6 @@
 ﻿@page "/weather"
 @inject HttpClient Http
-@inject WebSqlInterop ExampleJsInterop
+@inject WebSqlInterop WebSqlInterop
 
 <PageTitle>Weather</PageTitle>
 
@@ -69,7 +69,7 @@ VALUES ('2022-01-06', 1, 'Feezing'),
 
     protected override async Task OnInitializedAsync()
     {
-        var database = await ExampleJsInterop.CreateDatabase();
+        var database = await WebSqlInterop.CreateDatabase();
         await database.ExecuteAsync(CreateDatabaseSql);
         await database.ExecuteAsync(InsertTestDataSql);
         var result = await database.ExecuteAsync(SelectTestDataSql);
