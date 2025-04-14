@@ -1,0 +1,26 @@
+﻿<table>
+    <thead>
+        <tr>
+            @foreach (var column in Resultset.Columns)
+            {
+                <th>@column</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var row in Resultset.Values)
+        {
+            <tr>
+                @foreach (var column in row)
+                {
+                    <td>@column</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public required WebSqlResultset Resultset { get; set; }
+}
