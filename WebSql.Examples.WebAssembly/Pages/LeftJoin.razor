@@ -1,0 +1,149 @@
+﻿@page "/leftjoin"
+@inject WebSqlInterop WebSqlInterop
+
+<PageTitle>Left Join</PageTitle>
+
+<h1>Left Join</h1>
+
+<p>SQL Schema.</p>
+
+<pre>
+<code>
+@CreateDatabaseSql
+</code>
+</pre>
+
+<p>Data in the database.</p>
+
+<pre>
+<code>
+@InsertTestDataSql
+</code>
+</pre>
+
+<h2>And return data from database using SELECT</h2>
+
+<pre>
+<code>
+@SelectTestDataSql
+</code>
+</pre>
+
+<h2>Results</h2>
+@if (Resultset1 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ResultsetViewer Resultset="Resultset1" />
+}
+
+<h2>Other SELECT</h2>
+
+<pre>
+<code>
+@SelectTestDataSql2
+</code>
+</pre>
+
+<h2>Results</h2>
+@if (Resultset2 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ResultsetViewer Resultset="Resultset2" />
+}
+
+<h2>Fixed SELECT</h2>
+
+<pre>
+<code>
+@SelectTestDataSql3
+</code>
+</pre>
+
+<h2>Results</h2>
+@if (Resultset3 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ResultsetViewer Resultset="Resultset3" />
+}
+
+@code {
+    private string CreateDatabaseSql = @"
+CREATE TABLE IF NOT EXISTS a (Id INTEGER PRIMARY KEY, Name TEXT);
+CREATE TABLE IF NOT EXISTS b (Id INTEGER PRIMARY KEY, Name TEXT);
+";
+    private string InsertTestDataSql = @"
+INSERT INTO a(Id, Name)
+VALUES (1, '2022-02-24'),
+    (2, '2022-02-01'),
+    (3, '2023-03-01'),
+    (4, '2023-01-01'),
+    (5, '2023-01-01'),
+    (6, '2025-01-01'),
+    (7, '2024-01-01'),
+    (8, '2025-01-01'),
+    (9, '2025-01-01');
+
+INSERT INTO b(Id, Name)
+VALUES (2, '2024-02-01'),
+    (3, '2023-03-01'),
+    (4, '2023-12-31'),
+    (6, '2025-01-01'),
+    (7, '2025-07-01'),
+    (9, '2025-01-01');
+";
+    private string SelectTestDataSql = @"SELECT 
+    A.id    AS 'a.Id',
+    a.Name  AS 'a.Name', 
+    b.Id    AS 'b.Id',
+    b.Name  AS 'b.Name'
+FROM a
+LEFT JOIN b ON A.id = B.id AND b.Name < '2024-01-01'
+WHERE B.id IS NULL";
+    private string SelectTestDataSql2 = @"SELECT A.id as 'a.Id', a.Name, b.Id, b.Name
+FROM a
+LEFT JOIN b ON A.id = B.id
+WHERE B.id IS NULL
+    AND b.Name < '2024-01-01'";
+    private string SelectTestDataSql3 = @"SELECT A.id as 'a.Id', a.Name, b.Id, b.Name
+FROM a
+LEFT JOIN b ON A.id = B.id
+WHERE b.Id IS NULL
+    OR NOT (A.id = B.id AND b.Name < '2024-01-01')";
+    WebSqlResultset? Resultset1;
+    WebSqlResultset? Resultset2;
+    WebSqlResultset? Resultset3;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var database = await WebSqlInterop.CreateDatabase();
+        await database.ExecuteAsync(CreateDatabaseSql);
+        await database.ExecuteAsync(InsertTestDataSql);
+        var result = await database.ExecuteAsync(SelectTestDataSql);
+        if (result is { })
+        {
+            Resultset1 = result[0];
+        }
+
+        result = await database.ExecuteAsync(SelectTestDataSql2);
+        if (result is { })
+        {
+            Resultset2 = result.FirstOrDefault() ?? new WebSqlResultset() { Columns = [], Values = [] };
+        }
+
+        result = await database.ExecuteAsync(SelectTestDataSql3);
+        if (result is { })
+        {
+            Resultset3 = result.FirstOrDefault() ?? new WebSqlResultset() { Columns = [], Values = [] };
+        }
+    }
+}
