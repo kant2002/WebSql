@@ -69,8 +69,8 @@ VALUES ('2022-01-06', 1, 'Feezing'),
     protected override async Task OnInitializedAsync()
     {
         var database = await WebSqlInterop.CreateDatabase();
-        await database.ExecuteAsync(CreateDatabaseSql);
-        await database.ExecuteAsync(InsertTestDataSql);
+        await database.ExecuteNonQueryAsync(CreateDatabaseSql);
+        await database.ExecuteNonQueryAsync(InsertTestDataSql);
         var result = await database.ExecuteAsync(SelectTestDataSql);
         if (result is { })
         {

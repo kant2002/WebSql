@@ -21,6 +21,20 @@
           "destination": "wwwroot/lib/bootstrap/dist/"
         }
       ]
+    },
+    {
+      "library": "bootstrap-icons@1.11.3",
+      "destination": "wwwroot/lib/bootstrap-icons/dist",
+      "fileMappings": [
+        {
+          "files": [
+            "fonts/*",
+            "*.css"
+          ],
+          "root": "font",
+          "destination": "wwwroot/lib/bootstrap-icons/dist/"
+        }
+      ]
     }
   ]
 }

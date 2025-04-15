@@ -1,0 +1,48 @@
+﻿@page "/remote"
+@inject WebSqlInterop WebSqlInterop
+
+<PageTitle>Remote database</PageTitle>
+
+<h1>Remote database</h1>
+
+<p>
+    Chinook Database. Original can be found <a href="https://github.com/lerocha/chinook-database/blob/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite">on Github</a>.
+</p>
+<p>
+    For this example, database copied locally, otherwise CORS prevent from fetching the data. This library is still subject of browser's security sandbox which is good thing.
+</p>
+
+
+<h2>And return data from database using SELECT</h2>
+
+<pre>
+<code>
+@SelectTestDataSql
+</code>
+</pre>
+
+<h2>Results</h2>
+@if (Resultset1 == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <ResultsetViewer Resultset="Resultset1" />
+}
+
+@code {
+    private string SelectTestDataSql = @"SELECT * FROM Artist LIMIT 10;";
+    WebSqlResultset? Resultset1;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        var database = await WebSqlInterop.CreateDatabaseFromFile("Chinook_Sqlite.sqlite");
+        var result = await database.ExecuteAsync(SelectTestDataSql);
+        if (result is { })
+        {
+            Resultset1 = result.FirstOrDefault() ?? new WebSqlResultset() { Columns = [], Values = [] };
+        }
+    }
+}
