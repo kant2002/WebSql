@@ -7,7 +7,7 @@ The in-browser SQL engine powered by excellent <img src="https://user-images.git
 ## Installation
 
 ```
-dotnet add package WebSql --version 0.0.1
+dotnet add package WebSql
 ```
 
 ## Usage
